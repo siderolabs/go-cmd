@@ -37,13 +37,25 @@ func WaitWrapper(usingReaper bool, notifyCh <-chan ProcessInfo, cmd *exec.Cmd) e
 	return err
 }
 
+// ExitError is raised when exit status is not equal to 0.
+type ExitError struct {
+	ExitCode int
+}
+
+// Error implements error interface.
+func (exitError *ExitError) Error() string {
+	return fmt.Sprintf("exit status %d", exitError.ExitCode)
+}
+
 func convertWaitStatus(status syscall.WaitStatus) error {
 	if status.Signaled() {
 		return fmt.Errorf("signal: %s", status.Signal())
 	}
 
 	if status.Exited() && status.ExitStatus() != 0 {
-		return fmt.Errorf("exit status %d", status.ExitStatus())
+		return &ExitError{
+			ExitCode: status.ExitStatus(),
+		}
 	}
 
 	return nil
