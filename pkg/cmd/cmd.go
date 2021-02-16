@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os/exec"
@@ -17,6 +18,17 @@ import (
 )
 
 type stdinCtxKey string
+
+// ExitError wraps any exit error (reaper or exec).
+type ExitError struct {
+	ExitCode int
+	Output   []byte
+}
+
+// Error implements error interface.
+func (exitError *ExitError) Error() string {
+	return fmt.Sprintf("exit status %d: %s", exitError.ExitCode, exitError.Output)
+}
 
 // MaxStderrLen is maximum length of stderr output captured for error message.
 const (
@@ -75,6 +87,24 @@ func RunContext(ctx context.Context, name string, args ...string) (string, error
 	}
 
 	if err = reaper.WaitWrapper(usingReaper, notifyCh, cmd); err != nil {
+		var (
+			reaperErr *reaper.ExitError
+			execErr   *exec.ExitError
+		)
+
+		switch {
+		case errors.As(err, &reaperErr):
+			return stdout.String(), &ExitError{
+				ExitCode: reaperErr.ExitCode,
+				Output:   stderr.Bytes(),
+			}
+		case errors.As(err, &execErr) && execErr.ExitCode() != -1:
+			return stdout.String(), &ExitError{
+				ExitCode: execErr.ExitCode(),
+				Output:   stderr.Bytes(),
+			}
+		}
+
 		return stdout.String(), fmt.Errorf("%s: %s", err, stderr.String())
 	}
 
