@@ -8,6 +8,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"os/exec"
 
 	"github.com/armon/circbuf"
@@ -15,8 +16,20 @@ import (
 	"github.com/talos-systems/go-cmd/pkg/cmd/proc/reaper"
 )
 
+type stdinCtxKey string
+
 // MaxStderrLen is maximum length of stderr output captured for error message.
-const MaxStderrLen = 4096
+const (
+	MaxStderrLen = 4096
+
+	stdin stdinCtxKey = "stdin"
+)
+
+// WithStdin creates a new context from the existing context
+// and sets stdin value.
+func WithStdin(ctx context.Context, stdinData io.Reader) context.Context {
+	return context.WithValue(ctx, stdin, stdinData)
+}
 
 // Run executes a command.
 func Run(name string, args ...string) (string, error) {
@@ -35,6 +48,16 @@ func RunContext(ctx context.Context, name string, args ...string) (string, error
 	stderr, err := circbuf.NewBuffer(MaxStderrLen)
 	if err != nil {
 		return stdout.String(), err
+	}
+
+	stdin := ctx.Value(stdin)
+	if stdin != nil {
+		var ok bool
+
+		cmd.Stdin, ok = stdin.(io.Reader)
+		if !ok {
+			return "", fmt.Errorf("failed to read stdin object from the context")
+		}
 	}
 
 	cmd.Stdout = stdout
