@@ -1,9 +1,11 @@
-*
-!api
-!hack
-!internal
+# THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
+#
+# Generated on 2021-02-16T13:15:08Z by kres latest.
+
+**
 !pkg
 !go.mod
 !go.sum
-!*.go
+!.golangci.yml
 !README.md
+!.markdownlint.json
