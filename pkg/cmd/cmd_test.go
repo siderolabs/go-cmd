@@ -5,7 +5,9 @@
 package cmd_test
 
 import (
+	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -109,6 +111,10 @@ func (suite *CmdSuite) TestRun() {
 			suite.Assert().NoError(err)
 		}
 	}
+
+	stdout, err := cmd.RunContext(cmd.WithStdin(context.Background(), strings.NewReader("hello")), "xargs", "echo")
+	suite.Assert().NoError(err)
+	suite.Assert().Equal(stdout, "hello\n")
 }
 
 func TestCmdSuite(t *testing.T) {
