@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/talos-systems/go-cmd/pkg/cmd/proc/reaper"
+	"github.com/siderolabs/go-cmd/pkg/cmd/proc/reaper"
 )
 
 type ReaperSuite struct {
@@ -139,7 +139,7 @@ func (suite *ReaperSuite) TestWait() {
 		args []string
 	}
 
-	tests := []struct {
+	tests := []struct { //nolint:govet
 		args      args
 		errString string
 	}{

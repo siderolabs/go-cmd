@@ -1,18 +1,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2021-02-16T11:31:16Z by kres ce6bee5-dirty.
+# Generated on 2022-10-31T17:33:30Z by kres 03328da.
 
 codecov:
-require_ci_to_pass: false
+  require_ci_to_pass: false
 
 coverage:
-status:
-  project:
-    default:
-      target: 50%
-      threshold: 0.5%
-      base: auto
-      if_ci_failed: success
-  patch: off
+  status:
+    project:
+      default:
+        target: 50%
+        threshold: 0.5%
+        base: auto
+        if_ci_failed: success
+    patch: off
 
 comment: false

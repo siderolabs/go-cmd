@@ -5,6 +5,7 @@
 package reaper
 
 import (
+	"errors"
 	"log"
 	"os"
 	"os/signal"
@@ -13,12 +14,11 @@ import (
 )
 
 type zombieHunter struct {
-	mu sync.Mutex
-
-	running   bool
 	listeners map[chan<- ProcessInfo]struct{}
 	ready     chan struct{}
 	shutdown  chan struct{}
+	mu        sync.Mutex
+	running   bool
 }
 
 func (zh *zombieHunter) Run() {
@@ -42,7 +42,7 @@ func (zh *zombieHunter) Run() {
 
 func (zh *zombieHunter) Shutdown() {
 	zh.mu.Lock()
-	running := zh.running
+	running := zh.running //nolint:ifshort
 	zh.mu.Unlock()
 
 	if !running {
@@ -112,12 +112,12 @@ func (zh *zombieHunter) reapLoop() {
 		for {
 			// retry EINTR on wait4()
 			pid, err = syscall.Wait4(-1, &wstatus, syscall.WNOHANG, nil)
-			if err != syscall.EINTR {
+			if !errors.Is(err, syscall.EINTR) {
 				break
 			}
 		}
 
-		if err == syscall.ECHILD || pid == 0 {
+		if errors.Is(err, syscall.ECHILD) || pid == 0 {
 			// no more zombies
 			return
 		}

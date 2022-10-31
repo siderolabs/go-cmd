@@ -70,8 +70,9 @@ func getPPID(pid string) (int, error) {
 
 	inParens := false
 	field := 0
-	ppid := ""
+	ppid := "" //nolint:ifshort
 
+loop:
 	for i, ch := range line {
 		switch ch {
 		case '(':
@@ -86,7 +87,9 @@ func getPPID(pid string) (int, error) {
 			field++
 
 			if field == 3 {
-				ppid = strings.SplitN(line[i+1:], " ", 2)[0]
+				ppid, _, _ = strings.Cut(line[i+1:], " ")
+
+				break loop
 			}
 		}
 	}

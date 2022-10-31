@@ -14,15 +14,15 @@ import (
 
 	"github.com/armon/circbuf"
 
-	"github.com/talos-systems/go-cmd/pkg/cmd/proc/reaper"
+	"github.com/siderolabs/go-cmd/pkg/cmd/proc/reaper"
 )
 
 type stdinCtxKey string
 
 // ExitError wraps any exit error (reaper or exec).
 type ExitError struct {
-	ExitCode int
 	Output   []byte
+	ExitCode int
 }
 
 // Error implements error interface.
@@ -83,7 +83,7 @@ func RunContext(ctx context.Context, name string, args ...string) (string, error
 	}
 
 	if err = cmd.Start(); err != nil {
-		return stdout.String(), fmt.Errorf("%s: %s", err, stderr.String())
+		return stdout.String(), fmt.Errorf("%w: %s", err, stderr.String())
 	}
 
 	if err = reaper.WaitWrapper(usingReaper, notifyCh, cmd); err != nil {
@@ -105,7 +105,7 @@ func RunContext(ctx context.Context, name string, args ...string) (string, error
 			}
 		}
 
-		return stdout.String(), fmt.Errorf("%s: %s", err, stderr.String())
+		return stdout.String(), fmt.Errorf("%w: %s", err, stderr.String())
 	}
 
 	return stdout.String(), nil
