@@ -21,7 +21,7 @@ func KillAll() error {
 		gracefulTimeout = 10
 	)
 
-	for i := 0; i < killTimeout; i++ {
+	for i := range killTimeout {
 		pids, err := List()
 		if err != nil {
 			return err

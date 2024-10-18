@@ -1,10 +1,10 @@
 module github.com/siderolabs/go-cmd
 
-go 1.19
+go 1.23.2
 
 require (
 	github.com/armon/circbuf v0.0.0-20190214190532-5111143e8da2
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
