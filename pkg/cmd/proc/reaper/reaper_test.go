@@ -188,6 +188,61 @@ func (suite *ReaperSuite) TestWait() {
 	}
 }
 
+func (suite *ReaperSuite) TestProcessWait() {
+	type args struct {
+		name string
+		args []string
+	}
+
+	tests := []struct { //nolint:govet
+		args      args
+		errString string
+	}{
+		{
+			args{
+				"true",
+				[]string{},
+			},
+			"",
+		},
+		{
+			args{
+				"false",
+				[]string{},
+			},
+			"exit status 1",
+		},
+		{
+			args{
+				"/bin/sh",
+				[]string{
+					"-c",
+					"kill -2 $$",
+				},
+			},
+			"signal: interrupt",
+		},
+	}
+
+	notifyCh := make(chan reaper.ProcessInfo, 1)
+
+	suite.Require().True(reaper.Notify(notifyCh))
+	defer reaper.Stop(notifyCh)
+
+	for _, t := range tests {
+		cmd := exec.Command(t.args.name, t.args.args...)
+		suite.Require().NoError(cmd.Start())
+
+		err := reaper.ProcessWaitWrapper(true, notifyCh, cmd.Process)
+
+		if t.errString == "" {
+			suite.Assert().NoError(err)
+		} else {
+			suite.Assert().EqualError(err, t.errString)
+		}
+	}
+}
+
 func TestReaperSuite(t *testing.T) {
 	suite.Run(t, new(ReaperSuite))
 }
