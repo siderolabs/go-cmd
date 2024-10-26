@@ -44,9 +44,16 @@ func WaitWrapper(usingReaper bool, notifyCh <-chan ProcessInfo, cmd *exec.Cmd) e
 // ProcessWaitWrapper(true, proc) should be equivalent to proc.Wait().
 func ProcessWaitWrapper(usingReaper bool, notifyCh <-chan ProcessInfo, proc *os.Process) error {
 	if !usingReaper {
-		_, waitErr := proc.Wait()
+		state, err := proc.Wait()
+		if err != nil {
+			return err
+		}
 
-		return waitErr
+		if !state.Success() {
+			return &exec.ExitError{ProcessState: state}
+		}
+
+		return nil
 	}
 
 	var info ProcessInfo
